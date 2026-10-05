@@ -74,6 +74,11 @@ Docker Desktop não está aberto. Abra e repita. Se o Docker não for uma opçã
 sua máquina, crie um PostgreSQL gratuito em neon.com ou supabase.com e cole a
 string de conexão no `DATABASE_URL`. O resto do projeto não muda.
 
+No Neon, desligue **Connection pooling** antes de copiar: o endpoint `-pooler`
+usa pgbouncer em modo transação e o Prisma Migrate não funciona através dele.
+Remova também o `&channel_binding=require` do final da string, que o Prisma não
+reconhece.
+
 A Web NFC exige **contexto seguro**. Em desenvolvimento, `localhost` conta como
 seguro, mas o aparelho de teste precisa alcançar a máquina por HTTPS — use um
 túnel ou um certificado local. Com `http://` em IP de rede, `NDEFReader` não
