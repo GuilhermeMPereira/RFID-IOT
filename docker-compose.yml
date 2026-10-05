@@ -1,0 +1,18 @@
+services:
+  banco:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: auditoria
+      POSTGRES_PASSWORD: auditoria
+      POSTGRES_DB: auditoria_nfc
+    ports: ["5432:5432"]
+    volumes: ["dados_pg:/var/lib/postgresql/data"]
+  api:
+    build: ./api
+    environment:
+      DATABASE_URL: postgresql://auditoria:auditoria@banco:5432/auditoria_nfc
+      JWT_SEGREDO: trocar-em-producao
+    ports: ["3333:3333"]
+    depends_on: [banco]
+volumes:
+  dados_pg:
