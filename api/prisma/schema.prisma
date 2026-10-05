@@ -1,0 +1,97 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+
+model Auditor {
+  id         String      @id @default(uuid())
+  nome       String
+  email      String      @unique
+  senhaHash  String
+  perfil     Perfil      @default(AUDITOR)
+  criadoEm   DateTime    @default(now())
+  leituras   Leitura[]
+  inventarios Inventario[]
+  eventos    Evento[]
+}
+
+enum Perfil { AUDITOR GESTOR }
+
+model Ambiente {
+  id       String   @id @default(uuid())
+  codigo   String   @unique
+  nome     String
+  ativos   Ativo[]
+  leituras Leitura[]
+}
+
+model Ativo {
+  id          String    @id @default(uuid())
+  tombamento  String    @unique
+  descricao   String
+  ambienteId  String
+  ambiente    Ambiente  @relation(fields: [ambienteId], references: [id])
+  etiquetas   Etiqueta[]
+  criadoEm    DateTime  @default(now())
+}
+
+/// O UID de fabrica e imutavel; o vinculo pode ser revogado, nunca editado.
+model Etiqueta {
+  id         String    @id @default(uuid())
+  uid        String    @unique
+  ativoId    String
+  ativo      Ativo     @relation(fields: [ativoId], references: [id])
+  vinculadaEm DateTime @default(now())
+  revogadaEm DateTime?
+  leituras   Leitura[]
+}
+
+enum Modalidade { INICIAL ANUAL TRANSFERENCIA EXTINCAO EVENTUAL }
+
+model Inventario {
+  id           String      @id @default(uuid())
+  modalidade   Modalidade
+  ambienteIds  String[]
+  responsavelId String
+  responsavel  Auditor     @relation(fields: [responsavelId], references: [id])
+  abertoEm     DateTime    @default(now())
+  encerradoEm  DateTime?
+  leituras     Leitura[]
+  eventos      Evento[]
+}
+
+enum Desfecho { SUCESSO TEMPO_ESGOTADO ERRO_INTERFACE }
+
+/// Registro imutavel. Correcao gera nova Leitura, nunca UPDATE.
+model Leitura {
+  id             String     @id @default(uuid())
+  inventarioId   String
+  inventario     Inventario @relation(fields: [inventarioId], references: [id])
+  uidLido        String
+  etiquetaId     String?
+  etiqueta       Etiqueta?  @relation(fields: [etiquetaId], references: [id])
+  auditorId      String
+  auditor        Auditor    @relation(fields: [auditorId], references: [id])
+  ambienteId     String
+  ambiente       Ambiente   @relation(fields: [ambienteId], references: [id])
+  desfecho       Desfecho
+  mensagemErro   String?
+  // instrumentacao dos ensaios (secao 3.6 do artigo)
+  carimboCliente DateTime
+  carimboServidor DateTime @default(now())
+  dispositivo    String
+  condicaoEnsaio String?
+  /// chave natural usada para deduplicar a sincronizacao em lote
+  chaveIdempotencia String  @unique
+  @@index([inventarioId, uidLido])
+}
+
+model Evento {
+  id           String     @id @default(uuid())
+  inventarioId String
+  inventario   Inventario @relation(fields: [inventarioId], references: [id])
+  autorId      String
+  autor        Auditor    @relation(fields: [autorId], references: [id])
+  tipo         String
+  detalhe      Json
+  ocorridoEm   DateTime   @default(now())
+  @@index([inventarioId, ocorridoEm])
+}
