@@ -21,9 +21,17 @@ app.use((req, res, proximo) => {
   proximo()
 })
 
-app.use(sessoes, ativos, ambientes, inventarios, manutencao)
-
 app.get('/saude', (_req, res) => res.json({ estado: 'ok' }))
+
+/**
+ * Cada rota declara exigirSessao individualmente.
+ *
+ * Usar router.use(exigirSessao) sem caminho parece equivalente, mas no Express
+ * esse middleware roda para toda requisicao que atravessa o router, nao apenas
+ * para os caminhos que ele declara. Como os routers sao montados na raiz, isso
+ * fazia /saude responder 401.
+ */
+app.use(sessoes, ativos, ambientes, inventarios, manutencao)
 
 const porta = Number(process.env.PORT ?? 3333)
 app.listen(porta, '0.0.0.0', () => console.log(`API ouvindo em :${porta}`))

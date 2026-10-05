@@ -3,7 +3,6 @@ import { prisma } from '../prisma.js'
 import { exigirSessao } from '../autenticacao.js'
 
 export const manutencao = Router()
-manutencao.use(exigirSessao)
 
 /**
  * Descarta um ciclo inteiro, com suas leituras e eventos.
@@ -14,7 +13,7 @@ manutencao.use(exigirSessao)
  * para ciclo ainda nao encerrado, porque o encerramento torna o resultado
  * imutavel.
  */
-manutencao.delete('/inventarios/:id', async (req, res) => {
+manutencao.delete('/inventarios/:id', exigirSessao, async (req, res) => {
   const inventario = await prisma.inventario.findUnique({ where: { id: req.params.id } })
   if (!inventario) return res.status(404).json({ erro: 'inventário não encontrado' })
   if (inventario.encerradoEm) {

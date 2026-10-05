@@ -6,7 +6,6 @@ import { apurarDivergencias } from '../servicos/divergencias.js'
 import { registrarLeituras } from '../servicos/leituras.js'
 
 export const inventarios = Router()
-inventarios.use(exigirSessao)
 
 const abertura = z.object({
   modalidade: z.enum(['INICIAL', 'ANUAL', 'TRANSFERENCIA', 'EXTINCAO', 'EVENTUAL']),
@@ -14,7 +13,7 @@ const abertura = z.object({
 })
 
 /** RF04 — instaura o ciclo de contagem. */
-inventarios.post('/inventarios', async (req, res) => {
+inventarios.post('/inventarios', exigirSessao, async (req, res) => {
   const dados = abertura.safeParse(req.body)
   if (!dados.success) return res.status(400).json({ erro: dados.error.issues[0].message })
 
@@ -47,7 +46,7 @@ const leitura = z.object({
 })
 
 /** RF05 — persiste uma leitura. */
-inventarios.post('/inventarios/:id/leituras', async (req, res) => {
+inventarios.post('/inventarios/:id/leituras', exigirSessao, async (req, res) => {
   const dados = leitura.safeParse(req.body)
   if (!dados.success) return res.status(400).json({ erro: dados.error.issues[0].message })
 
@@ -60,7 +59,7 @@ inventarios.post('/inventarios/:id/leituras', async (req, res) => {
  * POST não é idempotente, então a deduplicação é feita no servidor pela
  * chave de idempotência gerada no cliente no instante da leitura.
  */
-inventarios.post('/inventarios/:id/leituras:lote', async (req, res) => {
+inventarios.post('/inventarios/:id/leituras/lote', exigirSessao, async (req, res) => {
   const dados = z.array(leitura).min(1).max(500).safeParse(req.body)
   if (!dados.success) return res.status(400).json({ erro: dados.error.issues[0].message })
 
@@ -73,12 +72,12 @@ inventarios.post('/inventarios/:id/leituras:lote', async (req, res) => {
 })
 
 /** RF08 — confronta esperado e lido. */
-inventarios.get('/inventarios/:id/divergencias', async (req, res) => {
+inventarios.get('/inventarios/:id/divergencias', exigirSessao, async (req, res) => {
   res.json(await apurarDivergencias(req.params.id))
 })
 
 /** RF09 — consolida o ciclo e torna o resultado imutável. */
-inventarios.post('/inventarios/:id/encerramento', async (req, res) => {
+inventarios.post('/inventarios/:id/encerramento', exigirSessao, async (req, res) => {
   const inventario = await prisma.inventario.findUnique({ where: { id: req.params.id } })
   if (!inventario) return res.status(404).json({ erro: 'inventário não encontrado' })
   if (inventario.encerradoEm) return res.status(409).json({ erro: 'este inventário já foi encerrado' })
@@ -103,7 +102,7 @@ inventarios.post('/inventarios/:id/encerramento', async (req, res) => {
 })
 
 /** RF10 — devolve a trilha de auditoria completa. */
-inventarios.get('/inventarios/:id/trilha', async (req, res) => {
+inventarios.get('/inventarios/:id/trilha', exigirSessao, async (req, res) => {
   const [eventos, leituras] = await Promise.all([
     prisma.evento.findMany({
       where: { inventarioId: req.params.id },

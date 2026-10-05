@@ -26,7 +26,7 @@ export async function sincronizar(token: string): Promise<ResultadoSincronizacao
   let total: ResultadoSincronizacao = { recebidas: 0, persistidas: 0, duplicadasIgnoradas: 0 }
 
   for (const [inventarioId, itens] of porInventario) {
-    const resposta = await fetch(`${API}/inventarios/${inventarioId}/leituras:lote`, {
+    const resposta = await fetch(`${API}/inventarios/${inventarioId}/leituras/lote`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
       body: JSON.stringify(itens.map(({ inventarioId: _i, enviado: _e, ...resto }) => resto)),
