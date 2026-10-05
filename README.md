@@ -53,10 +53,20 @@ atualização, no `revogadaEm` da etiqueta, na transação de encerramento.
 ## Rodando
 
 ```bash
-docker compose up -d           # banco e API
-cd api && npm install && npm run migrate
+docker compose up -d banco              # sobe só o PostgreSQL
+
+cd api
+cp .env.example .env                    # DATABASE_URL apontando para localhost
+npm install
+npx prisma migrate dev --name inicial   # cria as tabelas e gera o cliente
+npm run dev
+
 cd ../web && npm install && npm run dev
 ```
+
+O `.env` importa: dentro do contêiner o host do banco é `banco`, mas quando a
+API ou o script de ensaios rodam na sua máquina é `localhost`. Sem isso o
+Prisma falha com `Can't reach database server`.
 
 A Web NFC exige **contexto seguro**. Em desenvolvimento, `localhost` conta como
 seguro, mas o aparelho de teste precisa alcançar a máquina por HTTPS — use um
