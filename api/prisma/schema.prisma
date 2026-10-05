@@ -1,5 +1,11 @@
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
 model Auditor {
   id         String      @id @default(uuid())
@@ -13,7 +19,10 @@ model Auditor {
   eventos    Evento[]
 }
 
-enum Perfil { AUDITOR GESTOR }
+enum Perfil {
+  AUDITOR
+  GESTOR
+}
 
 model Ambiente {
   id       String   @id @default(uuid())
@@ -44,7 +53,13 @@ model Etiqueta {
   leituras   Leitura[]
 }
 
-enum Modalidade { INICIAL ANUAL TRANSFERENCIA EXTINCAO EVENTUAL }
+enum Modalidade {
+  INICIAL
+  ANUAL
+  TRANSFERENCIA
+  EXTINCAO
+  EVENTUAL
+}
 
 model Inventario {
   id           String      @id @default(uuid())
@@ -58,7 +73,11 @@ model Inventario {
   eventos      Evento[]
 }
 
-enum Desfecho { SUCESSO TEMPO_ESGOTADO ERRO_INTERFACE }
+enum Desfecho {
+  SUCESSO
+  TEMPO_ESGOTADO
+  ERRO_INTERFACE
+}
 
 /// Registro imutavel. Correcao gera nova Leitura, nunca UPDATE.
 model Leitura {

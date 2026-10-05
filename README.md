@@ -68,6 +68,11 @@ O `.env` importa: dentro do contêiner o host do banco é `banco`, mas quando a
 API ou o script de ensaios rodam na sua máquina é `localhost`. Sem isso o
 Prisma falha com `Can't reach database server`.
 
+**Sem Docker?** Se `docker compose` reclamar que não encontra o daemon, o
+Docker Desktop não está aberto. Abra e repita. Se o Docker não for uma opção na
+sua máquina, crie um PostgreSQL gratuito em neon.com ou supabase.com e cole a
+string de conexão no `DATABASE_URL`. O resto do projeto não muda.
+
 A Web NFC exige **contexto seguro**. Em desenvolvimento, `localhost` conta como
 seguro, mas o aparelho de teste precisa alcançar a máquina por HTTPS — use um
 túnel ou um certificado local. Com `http://` em IP de rede, `NDEFReader` não

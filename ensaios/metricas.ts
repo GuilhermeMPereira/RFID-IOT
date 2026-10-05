@@ -5,14 +5,9 @@
  * que é a entrada da análise quantitativa da seção de resultados. Mantido no
  * repositório para que o cálculo seja reprodutível e auditável, e não refeito
  * à mão em planilha.
- *
- * Uso:
- *   npm run metricas                 — usa o inventário aberto mais recente
- *   npm run metricas -- <inventarioId>
  */
 import { PrismaClient } from '@prisma/client'
-import { mkdirSync, writeFileSync } from 'node:fs'
-import { dirname } from 'node:path'
+import { writeFileSync } from 'node:fs'
 
 const prisma = new PrismaClient()
 
@@ -42,8 +37,6 @@ async function apurar(inventarioId: string): Promise<Linha[]> {
     orderBy: { carimboCliente: 'asc' },
   })
 
-  if (leituras.length === 0) return []
-
   const porCondicao = new Map<string, typeof leituras>()
   for (const l of leituras) {
     const chave = l.condicaoEnsaio ?? 'nao-informada'
@@ -70,9 +63,9 @@ async function apurar(inventarioId: string): Promise<Linha[]> {
       condicao,
       tentativas: grupo.length,
       sucessos: sucessos.length,
-      taxaSucesso: Number((grupo.length ? sucessos.length / grupo.length : 0).toFixed(4)),
+      taxaSucesso: grupo.length ? sucessos.length / grupo.length : 0,
       leiturasIncorretas: incorretas.length,
-      taxaIncorreta: Number((sucessos.length ? incorretas.length / sucessos.length : 0).toFixed(4)),
+      taxaIncorreta: sucessos.length ? incorretas.length / sucessos.length : 0,
       latenciaMediaMs: Math.round(latenciaMedia),
       latenciaDesvioMs: Math.round(desvio(latencias, latenciaMedia)),
       tempoPorAtivoMs: Math.round(tempoPorAtivo),
@@ -81,58 +74,17 @@ async function apurar(inventarioId: string): Promise<Linha[]> {
   })
 }
 
-async function resolverInventario(informado?: string): Promise<string | null> {
-  if (informado) {
-    const existe = await prisma.inventario.findUnique({ where: { id: informado } })
-    if (!existe) {
-      console.error(`Nenhum inventário com o id ${informado}.`)
-      return null
-    }
-    return informado
-  }
-  const recente = await prisma.inventario.findFirst({ orderBy: { abertoEm: 'desc' } })
-  if (!recente) {
-    console.error('Nenhum inventário no banco. Abra um ciclo antes de apurar as métricas.')
-    return null
-  }
-  console.log(`Nenhum id informado; usando o inventário mais recente (${recente.id}).\n`)
-  return recente.id
+const inventarioId = process.argv[2]
+if (!inventarioId) {
+  console.error('uso: tsx ensaios/metricas.ts <inventarioId>')
+  process.exit(1)
 }
 
-async function principal(): Promise<number> {
-  const inventarioId = await resolverInventario(process.argv[2])
-  if (!inventarioId) return 1
-
-  const linhas = await apurar(inventarioId)
-  if (linhas.length === 0) {
-    console.error('Este inventário ainda não tem leituras registradas.')
-    return 1
-  }
-
-  console.table(linhas)
-
-  const destino = `ensaios/dados/metricas-${inventarioId}.csv`
-  mkdirSync(dirname(destino), { recursive: true })
-  const cabecalho = Object.keys(linhas[0]).join(',')
-  const corpo = linhas.map((l) => Object.values(l).join(',')).join('\n')
-  writeFileSync(destino, `${cabecalho}\n${corpo}\n`)
-  console.log(`\nExportado para ${destino}`)
-  return 0
-}
-
-principal()
-  .then(async (codigo) => {
-    await prisma.$disconnect()
-    process.exitCode = codigo
-  })
-  .catch(async (erro) => {
-    await prisma.$disconnect()
-    if (erro?.code === 'P1001' || /Can't reach database/i.test(String(erro?.message))) {
-      console.error('Não foi possível conectar ao banco. Suba o ambiente com: docker compose up -d')
-    } else if (/did not initialize yet|@prisma\/client/i.test(String(erro?.message))) {
-      console.error('O cliente do Prisma não foi gerado. Rode: npx prisma generate')
-    } else {
-      console.error(erro)
-    }
-    process.exitCode = 1
-  })
+const linhas = await apurar(inventarioId)
+const cabecalho = Object.keys(linhas[0] ?? {}).join(',')
+const corpo = linhas.map((l) => Object.values(l).join(',')).join('\n')
+const destino = `ensaios/dados/metricas-${inventarioId}.csv`
+writeFileSync(destino, `${cabecalho}\n${corpo}\n`)
+console.table(linhas)
+console.log(`\nexportado para ${destino}`)
+await prisma.$disconnect()
