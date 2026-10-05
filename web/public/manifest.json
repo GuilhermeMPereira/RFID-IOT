@@ -1,0 +1,8 @@
+{
+  "name": "Auditoria NFC",
+  "short_name": "Auditoria",
+  "start_url": "/conferencia",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0e6e8c"
+}
