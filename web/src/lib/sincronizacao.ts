@@ -1,6 +1,6 @@
 import { marcarEnviadas, pendentes } from './fila'
 
-const API = process.env.NEXT_PUBLIC_API ?? 'http://localhost:3333'
+import { API } from './api'
 
 export type ResultadoSincronizacao = {
   recebidas: number

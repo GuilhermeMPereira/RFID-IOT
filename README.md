@@ -62,8 +62,38 @@ npx prisma migrate dev --name inicial   # cria as tabelas e gera o cliente
 npm run seed                            # auditor, ambientes e ativos de ensaio
 npm run dev
 
-cd ../web && npm install && npm run dev
+cd ../web
+cp .env.local.example .env.local         # NEXT_PUBLIC_API
+npm install
+npm run dev
 ```
+
+### Testando no celular
+
+A Web NFC só existe em **contexto seguro**. `localhost` conta como seguro, mas
+o celular não alcança o `localhost` da sua máquina — ali `localhost` é o próprio
+celular. Então o aparelho precisa abrir a aplicação por HTTPS.
+
+O caminho mais curto é um túnel, que dá uma URL `https://` pública apontando
+para a sua máquina:
+
+```bash
+npx cloudflared tunnel --url http://localhost:3000    # cliente
+npx cloudflared tunnel --url http://localhost:3333    # API
+```
+
+Pegue a URL `https://` da API e coloque em `web/.env.local` no
+`NEXT_PUBLIC_API`, reinicie o `npm run dev`, e abra a URL do cliente no Chrome
+do celular. Sem isso, `NDEFReader` simplesmente não existe e a aplicação exibe
+o aviso de navegador sem suporte.
+
+### Ordem de uso
+
+1. **Vincular etiquetas** (`/etiquetas`) — encoste o aparelho em cada etiqueta
+   para associar o UID ao ativo. Sem isso toda leitura cai como "não cadastrado".
+2. **Abrir ciclo** (`/`) — escolha modalidade e ambiente.
+3. **Conferir** (`/conferencia`) — uma aproximação por bem, e apure as
+   divergências ao final.
 
 O `.env` importa: dentro do contêiner o host do banco é `banco`, mas quando a
 API ou o script de ensaios rodam na sua máquina é `localhost`. Sem isso o
