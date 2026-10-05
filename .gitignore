@@ -6,3 +6,6 @@ dist/
 *.log
 api/ensaios/dados/*.csv
 !api/ensaios/dados/.gitkeep
+
+# pasta de trabalho do app; a versão boa do artigo fica em artigo/
+Claude outputs/
