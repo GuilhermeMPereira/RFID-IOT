@@ -59,6 +59,7 @@ cd api
 cp .env.example .env                    # DATABASE_URL apontando para localhost
 npm install
 npx prisma migrate dev --name inicial   # cria as tabelas e gera o cliente
+npm run seed                            # auditor, ambientes e ativos de ensaio
 npm run dev
 
 cd ../web && npm install && npm run dev

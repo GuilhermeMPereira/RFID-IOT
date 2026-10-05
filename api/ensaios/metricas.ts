@@ -14,7 +14,13 @@ import { PrismaClient } from '@prisma/client'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 
-const prisma = new PrismaClient()
+let cliente: PrismaClient | null = null
+
+/** Cria o cliente sob demanda, para que a falha vire mensagem e nao stack. */
+function prismaClient(): PrismaClient {
+  cliente ??= new PrismaClient()
+  return cliente
+}
 
 type Linha = {
   condicao: string
@@ -36,7 +42,7 @@ function desvio(valores: number[], media: number): number {
 }
 
 async function apurar(inventarioId: string): Promise<Linha[]> {
-  const leituras = await prisma.leitura.findMany({
+  const leituras = await prismaClient().leitura.findMany({
     where: { inventarioId },
     include: { etiqueta: true },
     orderBy: { carimboCliente: 'asc' },
@@ -83,14 +89,14 @@ async function apurar(inventarioId: string): Promise<Linha[]> {
 
 async function resolverInventario(informado?: string): Promise<string | null> {
   if (informado) {
-    const existe = await prisma.inventario.findUnique({ where: { id: informado } })
+    const existe = await prismaClient().inventario.findUnique({ where: { id: informado } })
     if (!existe) {
       console.error(`Nenhum inventário com o id ${informado}.`)
       return null
     }
     return informado
   }
-  const recente = await prisma.inventario.findFirst({ orderBy: { abertoEm: 'desc' } })
+  const recente = await prismaClient().inventario.findFirst({ orderBy: { abertoEm: 'desc' } })
   if (!recente) {
     console.error('Nenhum inventário no banco. Abra um ciclo antes de apurar as métricas.')
     return null
@@ -122,13 +128,15 @@ async function principal(): Promise<number> {
 
 principal()
   .then(async (codigo) => {
-    await prisma.$disconnect()
+    await cliente?.$disconnect()
     process.exitCode = codigo
   })
   .catch(async (erro) => {
-    await prisma.$disconnect()
+    await cliente?.$disconnect()
     if (erro?.code === 'P1001' || /Can't reach database/i.test(String(erro?.message))) {
-      console.error('Não foi possível conectar ao banco. Suba o ambiente com: docker compose up -d')
+      console.error('Não foi possível conectar ao banco em ' + (process.env.DATABASE_URL ?? '?').replace(/:\/\/[^@]*@/, '://***@') + '\n' +
+        'Suba o PostgreSQL antes: docker compose up -d banco\n' +
+        'Sem Docker, aponte DATABASE_URL para um Postgres hospedado (neon.com, supabase.com).')
     } else if (/did not initialize yet|@prisma\/client/i.test(String(erro?.message))) {
       console.error('O cliente do Prisma não foi gerado. Rode: npx prisma generate')
     } else {
