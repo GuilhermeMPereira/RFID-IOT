@@ -6,7 +6,8 @@
     "dev": "tsx watch src/servidor.ts",
     "build": "tsc",
     "start": "node dist/servidor.js",
-    "migrate": "prisma migrate dev"
+    "migrate": "prisma migrate dev",
+    "metricas": "tsx ensaios/metricas.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.0.0",

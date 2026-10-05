@@ -71,9 +71,16 @@ carimbo de tempo do cliente e do servidor, aparelho e condição experimental.
 São os seis dados previstos na subseção 3.6 do artigo.
 
 ```bash
-NEXT_PUBLIC_CONDICAO=aco-10mm-0g-online npm run dev   # define a condição
-npx tsx ensaios/metricas.ts <inventarioId>            # apura o Quadro 4
+# no cliente, define a condição experimental daquela bateria
+cd web && NEXT_PUBLIC_CONDICAO=aco-10mm-0g-online npm run dev
+
+# ao final, apura as métricas do Quadro 4 e exporta o CSV
+cd api && npm run metricas              # usa o inventário mais recente
+cd api && npm run metricas -- <id>      # ou um ciclo específico
 ```
+
+A apuração roda de dentro de `api/`, que é onde o cliente do Prisma está
+instalado. O CSV sai em `api/ensaios/dados/`.
 
 O protocolo completo está em [`docs/protocolo-ensaios.md`](docs/protocolo-ensaios.md)
 e os requisitos levantados, em [`docs/requisitos.md`](docs/requisitos.md).

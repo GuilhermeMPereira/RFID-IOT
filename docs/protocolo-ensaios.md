@@ -23,7 +23,7 @@ por exemplo `aco-10mm-0g-offline`.
 2. Cadastrar ativos e vincular etiquetas pelo painel
 3. Abrir um inventário por bateria de ensaios
 4. Para cada condição, definir `NEXT_PUBLIC_CONDICAO` e executar as repetições
-5. Ao final, apurar: `npx tsx ensaios/metricas.ts <inventarioId>`
+5. Ao final, apurar: `cd api && npm run metricas` (o CSV sai em `api/ensaios/dados/`)
 
 ## Ensaio de integridade offline
 

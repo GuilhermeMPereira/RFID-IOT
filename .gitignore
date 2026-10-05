@@ -4,5 +4,5 @@ dist/
 .env
 .env.local
 *.log
-ensaios/dados/*.csv
-!ensaios/dados/.gitkeep
+api/ensaios/dados/*.csv
+!api/ensaios/dados/.gitkeep
