@@ -36,14 +36,25 @@ export function gravarSessao(sessao: Sessao | null): void {
 
 async function requisitar<T>(caminho: string, opcoes: RequestInit = {}): Promise<T> {
   const sessao = lerSessao()
-  const resposta = await fetch(`${API}${caminho}`, {
-    ...opcoes,
-    headers: {
-      'content-type': 'application/json',
-      ...(sessao ? { authorization: `Bearer ${sessao.token}` } : {}),
-      ...opcoes.headers,
-    },
-  })
+  let resposta: Response
+  try {
+    resposta = await fetch(`${API}${caminho}`, {
+      ...opcoes,
+      headers: {
+        'content-type': 'application/json',
+        ...(sessao ? { authorization: `Bearer ${sessao.token}` } : {}),
+        ...opcoes.headers,
+      },
+    })
+  } catch {
+    // "Failed to fetch" nao diz nada; na pratica e a API fora do ar, ou um
+    // endereco que o aparelho nao alcanca (localhost, no celular, e ele mesmo).
+    throw new Error(
+      `Não foi possível falar com a API em ${API}. ` +
+        'Verifique se ela está rodando (npm run dev na pasta api) e, no celular, ' +
+        'se NEXT_PUBLIC_API aponta para um endereço que o aparelho alcança.',
+    )
+  }
   if (!resposta.ok) {
     const corpo = await resposta.json().catch(() => ({}))
     throw new Error(corpo.erro ?? `A API respondeu ${resposta.status}`)

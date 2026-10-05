@@ -68,6 +68,11 @@ npm install
 npm run dev
 ```
 
+A API e o cliente são dois processos. Deixe **dois terminais abertos**: um com
+`npm run dev` em `api/` e outro com `npm run dev` em `web/`. Se o login
+retornar que não conseguiu falar com a API, quase sempre é o terminal da API
+que foi fechado.
+
 ### Testando no celular
 
 A Web NFC só existe em **contexto seguro**. `localhost` conta como seguro, mas
