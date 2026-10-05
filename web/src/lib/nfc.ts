@@ -101,5 +101,9 @@ export async function lerEtiqueta(opcoes: OpcoesLeitura = {}): Promise<Tentativa
     }
   } finally {
     clearTimeout(expirou)
+    // Encerra a varredura. Sem isso o radio continua escaneando depois da
+    // leitura, e cada toque em "conferir" empilha mais um NDEFReader ativo:
+    // o Android passa a recusar novas varreduras e a bateria sofre.
+    if (!abortador.signal.aborted) abortador.abort()
   }
 }

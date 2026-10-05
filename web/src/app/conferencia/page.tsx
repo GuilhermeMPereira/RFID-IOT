@@ -53,6 +53,18 @@ export default function Conferencia() {
   async function conferir() {
     const { inventarioId, ambienteId } = sessao ?? {}
     if (!inventarioId || !ambienteId) return
+
+    // Navegador sem Web NFC nao e modo de falha do sistema, e aparelho errado.
+    // Registrar isso como tentativa contaminaria a taxa de sucesso dos ensaios.
+    if (!suportaWebNfc()) {
+      setAviso({
+        tipo: 'neutro',
+        texto: 'Este navegador não expõe a Web NFC, então não há o que ler. '
+          + 'Abra pelo Chrome do Android, em HTTPS. Nada foi registrado.',
+      })
+      return
+    }
+
     setLendo(true)
     setAviso({ tipo: 'neutro', texto: 'Aproxime o aparelho da etiqueta…' })
 

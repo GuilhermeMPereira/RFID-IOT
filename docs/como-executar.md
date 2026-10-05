@@ -62,6 +62,25 @@ endereço da página.
 A URL muda a cada execução do túnel, mas como nada no projeto depende dela,
 não há o que reconfigurar.
 
+## Antes da primeira leitura no celular
+
+Checklist do que precisa estar verdadeiro, em ordem:
+
+1. **NFC ligado** nas configurações do Android. Não há aviso na aplicação se
+   estiver desligado; a leitura apenas esgota o tempo.
+2. **Chrome**, não Samsung Internet, Firefox nem o navegador embutido de outro
+   aplicativo. Só o Chrome para Android expõe a Web NFC.
+3. **URL em `https://`**, a do túnel. Se a barra mostrar `http://` ou um IP, o
+   `NDEFReader` não existe e a tela avisa.
+4. **Permissão concedida.** Na primeira leitura o Chrome pergunta. Negando, a
+   tentativa é classificada como falha de interface.
+5. **Tela acesa e aba em primeiro plano.** O Android corta o rádio quando a
+   tela apaga ou o Chrome vai para segundo plano, e a leitura em curso é
+   abortada.
+6. **Etiqueta encostada na parte de trás do aparelho**, na altura da antena —
+   em geral o terço superior. Varia por modelo; vale localizar com uma etiqueta
+   conhecida antes de começar a bateria.
+
 ## Ordem de uso
 
 1. **`/etiquetas`** — para cada ativo, toque em "Ler e vincular" e encoste o
