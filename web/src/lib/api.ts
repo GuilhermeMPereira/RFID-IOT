@@ -5,7 +5,12 @@
  * proprio auditor e precisa sobreviver ao bloqueio de tela, que no Android
  * descarrega a aba com frequencia.
  */
-export const API = process.env.NEXT_PUBLIC_API ?? 'http://localhost:3333'
+/**
+ * Caminho base da API. O padrao '/api' e servido pelo proprio Next, que
+ * repassa para a API local. Mesma origem: sem CORS, e um unico tunel HTTPS
+ * atende o celular.
+ */
+export const API = process.env.NEXT_PUBLIC_API ?? '/api'
 
 const CHAVE = 'auditoria-nfc:sessao'
 

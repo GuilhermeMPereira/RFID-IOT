@@ -52,72 +52,20 @@ atualização, no `revogadaEm` da etiqueta, na transação de encerramento.
 
 ## Rodando
 
-```bash
-docker compose up -d banco              # sobe só o PostgreSQL
-
-cd api
-cp .env.example .env                    # DATABASE_URL apontando para localhost
-npm install
-npx prisma migrate dev --name inicial   # cria as tabelas e gera o cliente
-npm run seed                            # auditor, ambientes e ativos de ensaio
-npm run dev
-
-cd ../web
-cp .env.local.example .env.local         # NEXT_PUBLIC_API
-npm install
-npm run dev
-```
-
-A API e o cliente são dois processos. Deixe **dois terminais abertos**: um com
-`npm run dev` em `api/` e outro com `npm run dev` em `web/`. Se o login
-retornar que não conseguiu falar com a API, quase sempre é o terminal da API
-que foi fechado.
-
-### Testando no celular
-
-A Web NFC só existe em **contexto seguro**. `localhost` conta como seguro, mas
-o celular não alcança o `localhost` da sua máquina — ali `localhost` é o próprio
-celular. Então o aparelho precisa abrir a aplicação por HTTPS.
-
-O caminho mais curto é um túnel, que dá uma URL `https://` pública apontando
-para a sua máquina:
+O passo a passo completo, incluindo o teste no celular e a execução das
+baterias de ensaio, está em [`docs/como-executar.md`](docs/como-executar.md).
+Em resumo, dois terminais:
 
 ```bash
-npx cloudflared tunnel --url http://localhost:3000    # cliente
-npx cloudflared tunnel --url http://localhost:3333    # API
+cd api && npm run dev     # :3333
+cd web && npm run dev     # :3000
 ```
 
-Pegue a URL `https://` da API e coloque em `web/.env.local` no
-`NEXT_PUBLIC_API`, reinicie o `npm run dev`, e abra a URL do cliente no Chrome
-do celular. Sem isso, `NDEFReader` simplesmente não existe e a aplicação exibe
-o aviso de navegador sem suporte.
+E, para alcançar pelo celular, um túnel HTTPS apontando para o cliente:
 
-### Ordem de uso
-
-1. **Vincular etiquetas** (`/etiquetas`) — encoste o aparelho em cada etiqueta
-   para associar o UID ao ativo. Sem isso toda leitura cai como "não cadastrado".
-2. **Abrir ciclo** (`/`) — escolha modalidade e ambiente.
-3. **Conferir** (`/conferencia`) — uma aproximação por bem, e apure as
-   divergências ao final.
-
-O `.env` importa: dentro do contêiner o host do banco é `banco`, mas quando a
-API ou o script de ensaios rodam na sua máquina é `localhost`. Sem isso o
-Prisma falha com `Can't reach database server`.
-
-**Sem Docker?** Se `docker compose` reclamar que não encontra o daemon, o
-Docker Desktop não está aberto. Abra e repita. Se o Docker não for uma opção na
-sua máquina, crie um PostgreSQL gratuito em neon.com ou supabase.com e cole a
-string de conexão no `DATABASE_URL`. O resto do projeto não muda.
-
-No Neon, desligue **Connection pooling** antes de copiar: o endpoint `-pooler`
-usa pgbouncer em modo transação e o Prisma Migrate não funciona através dele.
-Remova também o `&channel_binding=require` do final da string, que o Prisma não
-reconhece.
-
-A Web NFC exige **contexto seguro**. Em desenvolvimento, `localhost` conta como
-seguro, mas o aparelho de teste precisa alcançar a máquina por HTTPS — use um
-túnel ou um certificado local. Com `http://` em IP de rede, `NDEFReader` não
-existe e a aplicação cai no aviso de navegador sem suporte.
+```bash
+npx cloudflared tunnel --url http://localhost:3000
+```
 
 ## Ensaios
 
