@@ -8,8 +8,10 @@ reiniciar nem recompilar nada ao trocar de condição.
 ## Conjunto de referência
 
 Sete bens, criados por `npm run seed`, cada um com uma etiqueta adesiva
-compatível com NTAG213 — ISO/IEC 14443-3A, NFC Forum Type 2, 144 bytes de
-memória de usuário, UID de 7 bytes — colada em local visível e plano. Só o UID
+de 25 mm compatível com NTAG213 — ISO/IEC 14443-3A, NFC Forum Type 2, 144
+bytes de memória de usuário, UID de 7 bytes — colada em local visível e plano.
+O fornecedor declara alcance máximo de leitura de 7 cm; a varredura de
+distância abaixo verifica esse valor por substrato. Só o UID
 é usado: o vínculo com o bem vive no banco, e nada é gravado na etiqueta. Quatro deles existem para
 cobrir os substratos que o acoplamento indutivo distingue; os outros três
 compõem a lista esperada do ciclo, de modo que a apuração de divergências
