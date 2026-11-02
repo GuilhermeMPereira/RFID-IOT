@@ -43,14 +43,20 @@ model Ativo {
 }
 
 /// O UID de fabrica e imutavel; o vinculo pode ser revogado, nunca editado.
+/// O UID nao e unico na tabela: uma etiqueta descolada pode ser revogada e
+/// vinculada de novo, e o historico desses vinculos precisa sobreviver. O que
+/// e unico e o vinculo ATIVO, garantido pelo indice unico parcial criado na
+/// migracao 20261102000000_vinculo_unico_por_etiqueta_ativa, que o Prisma nao
+/// sabe declarar no schema.
 model Etiqueta {
   id         String    @id @default(uuid())
-  uid        String    @unique
+  uid        String
   ativoId    String
   ativo      Ativo     @relation(fields: [ativoId], references: [id])
   vinculadaEm DateTime @default(now())
   revogadaEm DateTime?
   leituras   Leitura[]
+  @@index([uid])
 }
 
 enum Modalidade {

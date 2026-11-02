@@ -13,7 +13,7 @@ export const manutencao = Router()
  * para ciclo ainda nao encerrado, porque o encerramento torna o resultado
  * imutavel.
  */
-manutencao.delete('/inventarios/:id', exigirSessao, async (req, res) => {
+manutencao.delete<{ id: string }>('/inventarios/:id', exigirSessao, async (req, res) => {
   const inventario = await prisma.inventario.findUnique({ where: { id: req.params.id } })
   if (!inventario) return res.status(404).json({ erro: 'inventário não encontrado' })
   if (inventario.encerradoEm) {

@@ -77,7 +77,32 @@ export type Ativo = {
   etiquetas: Etiqueta[]
   ambiente: Ambiente
 }
-export type Inventario = { id: string; modalidade: string; ambienteIds: string[] }
+export type Inventario = {
+  id: string
+  modalidade: string
+  ambienteIds: string[]
+  abertoEm?: string
+  encerradoEm?: string | null
+}
+export type EventoTrilha = {
+  id: string
+  tipo: string
+  detalhe: Record<string, unknown>
+  ocorridoEm: string
+  autor: { nome: string }
+}
+export type LeituraTrilha = {
+  id: string
+  uidLido: string
+  desfecho: 'SUCESSO' | 'TEMPO_ESGOTADO' | 'ERRO_INTERFACE'
+  mensagemErro: string | null
+  carimboCliente: string
+  carimboServidor: string
+  dispositivo: string
+  condicaoEnsaio: string | null
+  auditor: { nome: string }
+  ambiente: { codigo: string }
+}
 export type Divergencia = {
   categoria: 'NAO_LOCALIZADO' | 'AMBIENTE_DIVERSO' | 'NAO_CADASTRADO'
   tombamento?: string
@@ -95,6 +120,12 @@ export const api = {
     }),
 
   ambientes: () => requisitar<Ambiente[]>('/ambientes'),
+
+  cadastrarAtivo: (tombamento: string, descricao: string, ambienteId: string) =>
+    requisitar<Ativo>('/ativos', {
+      method: 'POST',
+      body: JSON.stringify({ tombamento, descricao, ambienteId }),
+    }),
 
   ativos: (ambienteId?: string) =>
     requisitar<Ativo[]>(`/ativos${ambienteId ? `?ambiente=${ambienteId}` : ''}`),
@@ -117,8 +148,14 @@ export const api = {
     ),
 
   encerrar: (inventarioId: string) =>
-    requisitar<{ resumo: Record<string, number> }>(
+    requisitar<{ inventario: Inventario; resumo: Record<string, number> }>(
       `/inventarios/${inventarioId}/encerramento`,
       { method: 'POST' },
+    ),
+
+  /** RF10 — historico completo do ciclo: eventos e leituras, com autoria. */
+  trilha: (inventarioId: string) =>
+    requisitar<{ eventos: EventoTrilha[]; leituras: LeituraTrilha[] }>(
+      `/inventarios/${inventarioId}/trilha`,
     ),
 }

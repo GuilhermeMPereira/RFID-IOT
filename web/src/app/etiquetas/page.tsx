@@ -60,7 +60,12 @@ export default function Etiquetas() {
 
   return (
     <main>
-      <nav className="topo"><a href="/">Início</a><a href="/conferencia">Conferência</a></nav>
+      <nav className="topo">
+        <a href="/">Início</a>
+        <a href="/ativos">Ativos</a>
+        <a href="/conferencia">Conferência</a>
+        <a href="/trilha">Trilha</a>
+      </nav>
       <h1>Vincular etiquetas</h1>
       <p className="sub">
         {vinculados} de {ativos.length} ativos já têm etiqueta. Toque em um ativo

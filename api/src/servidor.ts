@@ -1,9 +1,10 @@
-import express from 'express'
+import express, { type NextFunction, type Request, type Response } from 'express'
 import { sessoes } from './rotas/sessoes.js'
 import { ativos } from './rotas/ativos.js'
 import { inventarios } from './rotas/inventarios.js'
 import { ambientes } from './rotas/ambientes.js'
 import { manutencao } from './rotas/manutencao.js'
+import { ErroDeRegra } from './erros.js'
 
 const app = express()
 app.use(express.json({ limit: '2mb' }))
@@ -32,6 +33,22 @@ app.get('/saude', (_req, res) => res.json({ estado: 'ok' }))
  * fazia /saude responder 401.
  */
 app.use(sessoes, ativos, ambientes, inventarios, manutencao)
+
+/**
+ * Tratador unico de erros.
+ *
+ * No Express 5 a rejeicao de um handler assincrono chega aqui sozinha, o que
+ * permite que os servicos recusem uma operacao com ErroDeRegra sem conhecer o
+ * Express. Qualquer outra falha vira 500 com mensagem generica, e o detalhe
+ * fica no log do servidor, nao na resposta.
+ */
+app.use((erro: unknown, _req: Request, res: Response, _proximo: NextFunction) => {
+  if (erro instanceof ErroDeRegra) {
+    return res.status(erro.status).json({ erro: erro.message })
+  }
+  console.error(erro)
+  res.status(500).json({ erro: 'falha inesperada no servidor' })
+})
 
 const porta = Number(process.env.PORT ?? 3333)
 app.listen(porta, '0.0.0.0', () => console.log(`API ouvindo em :${porta}`))

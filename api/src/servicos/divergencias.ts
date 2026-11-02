@@ -12,6 +12,12 @@ export type Divergencia = {
 /**
  * Confronta a lista de ativos esperados nos ambientes do ciclo com as
  * leituras bem-sucedidas, classificando em três categorias.
+ *
+ * A categoria "ambiente diverso" tem duas origens, e as duas precisam ser
+ * cobertas: o bem esperado no escopo que foi lido em outro ambiente do
+ * escopo, e o bem lotado fora do escopo que apareceu dentro dele. Sem a
+ * segunda, um bem encontrado onde não deveria estar sumia da apuração
+ * quando sua lotação ficava fora do ciclo.
  */
 export async function apurarDivergencias(inventarioId: string) {
   const inventario = await prisma.inventario.findUniqueOrThrow({ where: { id: inventarioId } })
@@ -26,6 +32,7 @@ export async function apurarDivergencias(inventarioId: string) {
   })
 
   const lidoPorUid = new Map(leituras.map((l) => [l.uidLido, l]))
+  const idsEsperados = new Set(esperados.map((a) => a.id))
   const divergencias: Divergencia[] = []
   let conformes = 0
 
@@ -51,6 +58,7 @@ export async function apurarDivergencias(inventarioId: string) {
     }
   }
 
+  const jaRelatados = new Set<string>()
   for (const leitura of leituras) {
     if (!leitura.etiqueta) {
       divergencias.push({
@@ -58,7 +66,18 @@ export async function apurarDivergencias(inventarioId: string) {
         uid: leitura.uidLido,
         ambienteLido: leitura.ambiente.codigo,
       })
+      continue
     }
+    const ativo = leitura.etiqueta.ativo
+    if (idsEsperados.has(ativo.id) || jaRelatados.has(ativo.id)) continue
+    jaRelatados.add(ativo.id)
+    divergencias.push({
+      categoria: 'AMBIENTE_DIVERSO',
+      tombamento: ativo.tombamento,
+      descricao: ativo.descricao,
+      ambienteEsperado: ativo.ambiente.codigo,
+      ambienteLido: leitura.ambiente.codigo,
+    })
   }
 
   return {

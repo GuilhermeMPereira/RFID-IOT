@@ -13,7 +13,7 @@ a conferência de verdade, um celular Android com NFC e Chrome 89 ou superior.
 cd api
 cp .env.example .env                    # cole aqui o DATABASE_URL
 npm install
-npx prisma migrate dev --name inicial   # cria as tabelas
+npx prisma migrate deploy               # cria as tabelas e os indices
 npm run seed                            # auditor, 2 ambientes, 7 ativos
 
 # 2. Cliente
@@ -83,25 +83,31 @@ Checklist do que precisa estar verdadeiro, em ordem:
 
 ## Ordem de uso
 
-1. **`/etiquetas`** — para cada ativo, toque em "Ler e vincular" e encoste o
+1. **`/ativos`** — cadastre os bens com tombamento, descrição e ambiente de
+   lotação. A lotação define a lista esperada de cada ciclo, e portanto o que
+   conta como divergência.
+2. **`/etiquetas`** — para cada ativo, toque em "Ler e vincular" e encoste o
    aparelho na etiqueta que vai ficar nele. Sem esse vínculo, toda leitura
-   posterior cai na categoria "não cadastrado".
-2. **`/`** — escolha a modalidade e o ambiente, e abra o ciclo.
-3. **`/conferencia`** — uma aproximação por bem. Ao final, "Apurar
-   divergências".
+   posterior cai na categoria "não cadastrado". Trocar a etiqueta de um bem
+   revoga o vínculo anterior na mesma transação: o histórico fica, mas nunca
+   há dois vínculos ativos.
+3. **`/`** — escolha a modalidade e o ambiente, e abra o ciclo.
+4. **`/conferencia`** — uma aproximação por bem. Ao final, "Apurar
+   divergências" e depois "Encerrar ciclo". O encerramento consolida o
+   resultado: a partir dele o servidor recusa novas leituras naquele ciclo.
+5. **`/trilha`** — histórico completo: quem leu, quando, de que aparelho, com
+   os dois carimbos de tempo e a latência de cada leitura, inclusive das
+   tentativas que falharam.
 
 ## Executando uma bateria de ensaios
 
 A condição experimental acompanha cada leitura até o banco, e é por ela que as
-métricas são agrupadas. Antes de cada bateria, defina a condição em
-`web/.env.local` e **reinicie** o `npm run dev`, porque variáveis
-`NEXT_PUBLIC_*` são embutidas na compilação:
+métricas são agrupadas. Escolha a condição no seletor no alto da tela
+`/conferencia`, antes de cada bateria. A escolha fica guardada no aparelho e
+vale para as leituras seguintes, até ser trocada — não é preciso reiniciar
+nem recompilar nada entre as condições.
 
-```
-NEXT_PUBLIC_CONDICAO="aco-10mm-0g-online"
-```
-
-A nomenclatura e os fatores a variar estão em
+Os fatores a variar e a quantidade de repetições estão em
 [`protocolo-ensaios.md`](protocolo-ensaios.md).
 
 Ao final de todas as baterias:
@@ -125,3 +131,20 @@ métricas do Quadro 4 do artigo. É esse arquivo que alimenta a seção 4.3.
 | Leitura some ao bloquear a tela | O Android corta o rádio. Mantenha a tela acesa |
 | Toda leitura vira "não cadastrado" | As etiquetas não foram vinculadas em `/etiquetas` |
 | Prisma Migrate falha no Neon | O endereço tem `-pooler`. Desligue o Connection pooling |
+| "este ciclo já foi encerrado" ao conferir | Esperado. Encerramento torna o ciclo imutável; abra outro |
+| "esta etiqueta já está vinculada a outro ativo" | A etiqueta tem vínculo ativo em outro bem. Troque a etiqueta daquele bem primeiro |
+
+## Testando o comportamento offline
+
+O service worker só é registrado na versão compilada, porque em
+desenvolvimento o Next troca os módulos a quente e um casco em cache serviria
+arquivos velhos:
+
+```bash
+cd web && npm run build && npm start
+```
+
+Abra a aplicação pelo túnel, deixe carregar uma vez, ative o modo avião e
+recarregue. A aplicação continua abrindo, as leituras entram na fila local e
+sobem sozinhas quando a rede volta. Chamadas a `/api/*` nunca são servidas do
+cache: devolver uma apuração velha seria pior do que falhar.

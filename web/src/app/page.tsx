@@ -106,8 +106,10 @@ export default function Inicio() {
   return (
     <main>
       <nav className="topo">
-        <a href="/etiquetas">Vincular etiquetas</a>
+        <a href="/ativos">Ativos</a>
+        <a href="/etiquetas">Etiquetas</a>
         <a href="/conferencia">Conferência</a>
+        <a href="/trilha">Trilha</a>
       </nav>
       <h1>Abrir ciclo de inventário</h1>
       <p className="sub">Auditor: {sessao.auditor.nome}</p>

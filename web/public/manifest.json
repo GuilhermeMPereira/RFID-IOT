@@ -1,8 +1,17 @@
 {
-  "name": "Auditoria NFC",
-  "short_name": "Auditoria",
-  "start_url": "/conferencia",
+  "name": "Auditoria NFC de patrimônio",
+  "short_name": "Auditoria NFC",
+  "description": "Conferência de inventário patrimonial por leitura NFC no próprio aparelho do auditor.",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#0e6e8c"
+  "theme_color": "#0e6e8c",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
 }

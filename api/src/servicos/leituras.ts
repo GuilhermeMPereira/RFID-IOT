@@ -1,4 +1,5 @@
 import { prisma } from '../prisma.js'
+import { ErroDeRegra } from '../erros.js'
 
 type LeituraEntrada = {
   uidLido: string
@@ -18,12 +19,25 @@ type LeituraEntrada = {
  * acompanha o registro até o banco. Reenvios da mesma fila offline — por
  * reconexão instável, por exemplo — não duplicam registros, porque a
  * restrição de unicidade da coluna rejeita a segunda inserção.
+ *
+ * Ciclo encerrado não aceita leitura. Sem essa recusa, o encerramento
+ * registraria um resumo que poderia ser contrariado depois por uma leitura
+ * tardia, e o resultado deixaria de ser imutável (RF09).
  */
 export async function registrarLeituras(
   inventarioId: string,
   auditorId: string,
   entradas: LeituraEntrada[],
 ) {
+  const inventario = await prisma.inventario.findUnique({
+    where: { id: inventarioId },
+    select: { encerradoEm: true },
+  })
+  if (!inventario) throw new ErroDeRegra(404, 'inventário não encontrado')
+  if (inventario.encerradoEm) {
+    throw new ErroDeRegra(409, 'este ciclo já foi encerrado e não aceita novas leituras')
+  }
+
   const chaves = entradas.map((e) => e.chaveIdempotencia)
   const existentes = await prisma.leitura.findMany({
     where: { chaveIdempotencia: { in: chaves } },
