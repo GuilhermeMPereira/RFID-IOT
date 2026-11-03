@@ -42,25 +42,27 @@ trabalho futuro.
 
 ## Condições e repetições
 
-Dez condições, 30 repetições cada, 300 tentativas no total. Trinta repetições por
-condição permitem estimar a taxa de sucesso com erro padrão abaixo de 10
-pontos percentuais no pior caso (p = 0,5), suficiente para separar uma
-condição que falha de uma que não falha, que é a pergunta do ensaio.
+Sete condições, dez repetições cada, 70 tentativas. O conjunto foi reduzido
+ao que sustenta cada afirmação do artigo: os quatro substratos a 0 mm
+isolam o efeito do material, o aço a 10 mm é onde a distância mais pesa, a
+aproximação perpendicular testa a dependência do paralelismo entre antenas
+e a ausência de rede exercita a fila local.
 
 | Condição (seletor) | Bem | Distância | Ângulo | Rede |
 |--------------------|-----|-----------|--------|------|
 | `madeira-0mm-0g` | 000101 | 0 mm | 0° | com |
-| `madeira-10mm-0g` | 000101 | 10 mm | 0° | com |
 | `plastico-0mm-0g` | 000102 | 0 mm | 0° | com |
-| `plastico-10mm-0g` | 000102 | 10 mm | 0° | com |
 | `aco-0mm-0g` | 000103 | 0 mm | 0° | com |
-| `aco-10mm-0g` | 000103 | 10 mm | 0° | com |
 | `eletronico-0mm` | 000104 | 0 mm | 0° | com |
-| `angulo-45g` | 000101 | 0 mm | 45° | com |
+| `aco-10mm-0g` | 000103 | 10 mm | 0° | com |
 | `angulo-90g` | 000101 | 0 mm | 90° | com |
 | `sem-rede` | 000101 | 0 mm | 0° | sem |
 
-São 300 tentativas, e a bateria completa leva em torno de uma hora.
+Dez repetições não ordenam entre si substratos de desempenho próximo. O que
+elas sustentam é a distinção grossa: pela regra de três, dez leituras sem
+falha situam a taxa de falha abaixo de 30% com 95% de confiança, o que
+separa a condição em que a captura funciona daquela em que não funciona.
+A bateria leva cerca de 20 minutos.
 
 ## Passos
 
@@ -78,10 +80,10 @@ São 300 tentativas, e a bateria completa leva em torno de uma hora.
    Eventual, ambiente LAB-01. Anotar o identificador do ciclo.
 5. Em `/conferencia`, selecionar a primeira condição.
 6. Posicionar o aparelho no gabarito, na distância e no ângulo da condição,
-   tocar em "Conferir próximo bem" e aproximar. Repetir 30 vezes, afastando o
+   tocar em "Conferir próximo bem" e aproximar. Repetir 10 vezes, afastando o
    aparelho do gabarito entre uma tentativa e outra, para que cada repetição
    seja uma aproximação completa e não uma leitura contínua.
-7. Trocar a condição no seletor e repetir o passo 6, até as dez condições.
+7. Trocar a condição no seletor e repetir o passo 6, até as sete condições.
    Na condição `sem-rede`, colocar o aparelho em modo avião antes e restaurar
    a rede ao final, conferindo que a fila subiu.
 8. Encerrar o ciclo em "Encerrar ciclo". O encerramento consolida o resultado
@@ -93,20 +95,19 @@ São 300 tentativas, e a bateria completa leva em torno de uma hora.
 
 ## Distância máxima efetiva
 
-Medida à parte, porque exige varredura e não repetição em ponto fixo. Para
-cada substrato, com o ângulo em 0°: 10 leituras a 0 mm, depois a 5, 10, 15 e
-20 mm. A distância máxima efetiva é o maior passo em que a taxa de sucesso se
-mantém em 95% ou mais. Usar a condição `<substrato>-<distância>mm-0g` para
-que os passos fiquem separados na apuração.
+Medida à parte, em dois substratos de comportamento oposto — madeira e aço
+pintado. Cinco leituras em 0, 10 e 20 mm, com o ângulo em 0°. A distância
+máxima efetiva é o maior passo em que as cinco leram. São 30 leituras, uns
+10 minutos.
 
 ## Ensaio de integridade offline
 
 Executado à parte, para a métrica de integridade dos registros:
 
 1. Colocar o aparelho em modo avião.
-2. Executar 30 leituras, contando-as manualmente.
+2. Executar 10 leituras, contando-as manualmente.
 3. Restaurar a rede e aguardar a sincronização.
-4. Conferir `persistidas + duplicadasIgnoradas` contra 30, e conferir a
+4. Conferir `persistidas + duplicadasIgnoradas` contra 10, e conferir a
    contagem em `/trilha`.
 5. Repetir forçando a queda no meio da sincronização, para verificar que o
    reenvio não duplica registros.
