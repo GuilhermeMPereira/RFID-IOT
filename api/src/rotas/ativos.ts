@@ -76,3 +76,26 @@ ativos.post<{ id: string }>('/ativos/:id/etiquetas', exigirSessao, async (req, r
   })
   res.status(201).json(criada)
 })
+
+/**
+ * Revoga o vinculo ativo de um bem, deixando-o sem etiqueta.
+ *
+ * Ate aqui so dava para trocar uma etiqueta por outra. Em campo a etiqueta
+ * descola, estraga ou vai parar em outro bem, e o cadastro precisa poder
+ * registrar que aquele bem ficou sem nenhuma.
+ *
+ * A linha nao e apagada: recebe revogadaEm. As leituras ja registradas
+ * continuam apontando para o vinculo que valia no instante em que
+ * ocorreram, que e o que a trilha de auditoria exige.
+ */
+ativos.delete<{ id: string }>('/ativos/:id/etiquetas', exigirSessao, async (req, res) => {
+  const ativo = await prisma.ativo.findUnique({ where: { id: req.params.id } })
+  if (!ativo) throw new ErroDeRegra(404, 'ativo não encontrado')
+
+  const { count } = await prisma.etiqueta.updateMany({
+    where: { ativoId: ativo.id, revogadaEm: null },
+    data: { revogadaEm: new Date() },
+  })
+  if (count === 0) throw new ErroDeRegra(409, 'este bem não tem etiqueta vinculada')
+  res.status(204).end()
+})

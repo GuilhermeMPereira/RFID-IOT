@@ -14,6 +14,9 @@ export default function Etiquetas() {
   const [sessao, setSessao] = useState<Sessao | null>(null)
   const [ativos, setAtivos] = useState<Ativo[]>([])
   const [lendoPara, setLendoPara] = useState<string | null>(null)
+  // Desvincular pede dois toques: o primeiro arma, o segundo confirma. Sem
+  // isso um toque errado na lista apaga o vinculo no meio de uma bateria.
+  const [confirmando, setConfirmando] = useState<string | null>(null)
   const [aviso, setAviso] = useState<{ tipo: string; texto: string } | null>(null)
 
   useEffect(() => { setSessao(lerSessao()) }, [])
@@ -49,6 +52,22 @@ export default function Etiquetas() {
       setAviso({ tipo: 'erro', texto: (e as Error).message })
     } finally {
       setLendoPara(null)
+    }
+  }
+
+  async function desvincular(ativo: Ativo) {
+    if (confirmando !== ativo.id) {
+      setConfirmando(ativo.id)
+      setAviso({ tipo: 'neutro', texto: `Toque de novo para desvincular a etiqueta de ${ativo.tombamento}.` })
+      return
+    }
+    setConfirmando(null)
+    try {
+      await api.desvincularEtiqueta(ativo.id)
+      setAviso({ tipo: 'ok', texto: `${ativo.tombamento} ficou sem etiqueta.` })
+      await recarregar()
+    } catch (e) {
+      setAviso({ tipo: 'erro', texto: (e as Error).message })
     }
   }
 
@@ -97,6 +116,15 @@ export default function Etiquetas() {
               {lendoPara === ativo.id ? 'Aproxime a etiqueta…'
                 : etiqueta ? 'Trocar etiqueta' : 'Ler e vincular'}
             </button>
+            {etiqueta && (
+              <button
+                className="secundario"
+                disabled={lendoPara !== null}
+                onClick={() => desvincular(ativo)}
+              >
+                {confirmando === ativo.id ? 'Toque de novo para confirmar' : 'Desvincular'}
+              </button>
+            )}
           </div>
         )
       })}

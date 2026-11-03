@@ -90,7 +90,9 @@ Checklist do que precisa estar verdadeiro, em ordem:
    aparelho na etiqueta que vai ficar nele. Sem esse vínculo, toda leitura
    posterior cai na categoria "não cadastrado". Trocar a etiqueta de um bem
    revoga o vínculo anterior na mesma transação: o histórico fica, mas nunca
-   há dois vínculos ativos.
+   há dois vínculos ativos. "Desvincular" deixa o bem sem etiqueta nenhuma,
+   com dois toques para confirmar; a linha não é apagada, recebe data de
+   revogação, de modo que as leituras já registradas continuem válidas.
 3. **`/`** — escolha a modalidade e o ambiente, e abra o ciclo.
 4. **`/conferencia`** — uma aproximação por bem. Ao final, "Apurar
    divergências" e depois "Encerrar ciclo". O encerramento consolida o

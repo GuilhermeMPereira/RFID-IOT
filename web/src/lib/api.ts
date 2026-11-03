@@ -64,6 +64,8 @@ async function requisitar<T>(caminho: string, opcoes: RequestInit = {}): Promise
     const corpo = await resposta.json().catch(() => ({}))
     throw new Error(corpo.erro ?? `A API respondeu ${resposta.status}`)
   }
+  // 204 nao traz corpo, e resposta.json() estouraria em cima de uma resposta vazia
+  if (resposta.status === 204) return undefined as T
   return resposta.json() as Promise<T>
 }
 
@@ -129,6 +131,10 @@ export const api = {
 
   ativos: (ambienteId?: string) =>
     requisitar<Ativo[]>(`/ativos${ambienteId ? `?ambiente=${ambienteId}` : ''}`),
+
+  /** Revoga o vínculo ativo do bem; a linha fica no histórico. */
+  desvincularEtiqueta: (ativoId: string) =>
+    requisitar<void>(`/ativos/${ativoId}/etiquetas`, { method: 'DELETE' }),
 
   vincularEtiqueta: (ativoId: string, uid: string) =>
     requisitar<Etiqueta>(`/ativos/${ativoId}/etiquetas`, {
