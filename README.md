@@ -41,6 +41,100 @@ elevado, passa a ser o aparelho que o auditor já tem no bolso.
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+## Modelo de dados
+
+```mermaid
+erDiagram
+    AUDITOR ||--o{ INVENTARIO : "responde por"
+    AUDITOR ||--o{ LEITURA    : "registra"
+    AUDITOR ||--o{ EVENTO     : "é autor de"
+    AMBIENTE ||--o{ ATIVO     : "lota"
+    AMBIENTE ||--o{ LEITURA   : "é onde ocorre"
+    ATIVO    ||--o{ ETIQUETA  : "recebe"
+    ETIQUETA |o--o{ LEITURA   : "é reconhecida em"
+    INVENTARIO ||--o{ LEITURA : "acumula"
+    INVENTARIO ||--o{ EVENTO  : "registra"
+
+    AUDITOR {
+        uuid     id PK
+        string   nome
+        string   email UK
+        string   senhaHash
+        enum     perfil "AUDITOR | GESTOR"
+    }
+    AMBIENTE {
+        uuid     id PK
+        string   codigo UK "LAB-01, DEP-01"
+        string   nome
+    }
+    ATIVO {
+        uuid     id PK
+        string   tombamento UK
+        string   descricao
+        uuid     ambienteId FK "lotação"
+    }
+    ETIQUETA {
+        uuid     id PK
+        string   uid "UID de fábrica, 7 bytes"
+        uuid     ativoId FK
+        datetime vinculadaEm
+        datetime revogadaEm "nulo enquanto ativa"
+    }
+    INVENTARIO {
+        uuid     id PK
+        enum     modalidade "as 5 da IN 205/1988"
+        string   ambienteIds "escopo congelado"
+        uuid     responsavelId FK
+        datetime abertoEm
+        datetime encerradoEm "nulo enquanto aberto"
+    }
+    LEITURA {
+        uuid     id PK
+        uuid     inventarioId FK
+        string   uidLido
+        uuid     etiquetaId FK "nulo se sem vínculo"
+        uuid     auditorId FK
+        uuid     ambienteId FK
+        enum     desfecho "SUCESSO | TEMPO_ESGOTADO | ERRO_INTERFACE"
+        string   mensagemErro
+        datetime carimboCliente "instante da resposta da etiqueta"
+        datetime carimboServidor "instante da persistência"
+        string   dispositivo
+        string   condicaoEnsaio
+        string   chaveIdempotencia UK
+    }
+    EVENTO {
+        uuid     id PK
+        uuid     inventarioId FK
+        uuid     autorId FK
+        string   tipo "INVENTARIO_ABERTO | INVENTARIO_ENCERRADO"
+        json     detalhe
+        datetime ocorridoEm
+    }
+```
+
+Quatro decisões do modelo merecem explicação, porque nenhuma é o desenho
+óbvio:
+
+**`Leitura` não tem campo de atualização.** Não há `atualizadoEm` porque não
+há atualização: correção gera uma nova linha. Uma contagem que pode ser
+editada depois não serve como evidência de auditoria.
+
+**`Leitura.etiquetaId` é opcional.** Toda tentativa vira registro, inclusive
+quando o UID lido não corresponde a vínculo nenhum. É assim que a apuração
+distingue "não cadastrado" de "não localizado", e é dessa coluna que sai a
+taxa de leitura incorreta.
+
+**`Etiqueta.uid` não é único na tabela.** Uma etiqueta descolada pode ser
+revogada e vinculada de novo, e esse histórico precisa sobreviver. O que é
+único é o vínculo *ativo*, garantido por um índice único parcial
+(`WHERE revogadaEm IS NULL`) criado na migração — o Prisma não sabe declarar
+isso no schema, mas o PostgreSQL aplica.
+
+**`Inventario.ambienteIds` é um array, não uma tabela de junção.** O escopo
+de um ciclo encerrado tem de ficar congelado. Com junção, apagar um ambiente
+mudaria retroativamente o escopo de um inventário já fechado.
+
 A etiqueta guarda **apenas o UID de fábrica**. O vínculo entre UID e bem vive
 no banco, não na etiqueta: gravá-lo nos dois lugares criaria duas versões da
 mesma informação, e uma etiqueta recolada em outro bem passaria a contradizer
