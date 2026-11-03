@@ -65,6 +65,9 @@ de um aparelho leva em torno de uma hora.
 
 1. Subir a API e o cliente, e abrir o cliente no celular pelo túnel HTTPS
    (ver [`como-executar.md`](como-executar.md)).
+   **Vincule todas as etiquetas que for usar antes de começar.** A métrica de
+   leitura incorreta compara o UID lido com os vínculos ativos: uma etiqueta
+   sem vínculo entra na conta como erro quando foi falha de preparação.
 2. Em `/ativos`, conferir que os sete bens estão cadastrados com a lotação
    correta. Em `/etiquetas`, vincular a etiqueta de cada um.
 3. Localizar a antena do aparelho com uma etiqueta conhecida antes de
