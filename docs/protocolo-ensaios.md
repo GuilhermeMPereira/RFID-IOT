@@ -42,27 +42,28 @@ trabalho futuro.
 
 ## Condições e repetições
 
-Sete condições, dez repetições cada, 70 tentativas. O conjunto foi reduzido
-ao que sustenta cada afirmação do artigo: os quatro substratos a 0 mm
-isolam o efeito do material, o aço a 10 mm é onde a distância mais pesa, a
-aproximação perpendicular testa a dependência do paralelismo entre antenas
-e a ausência de rede exercita a fila local.
+Cinco condições, dez repetições cada, 50 tentativas, cerca de 15 minutos.
+O conjunto foi reduzido ao que sustenta cada afirmação do artigo: três
+substratos a 0 mm isolam o efeito do material, a aproximação perpendicular
+testa a dependência do paralelismo entre antenas e a ausência de rede
+exercita a fila local, servindo também ao ensaio de integridade.
 
 | Condição (seletor) | Bem | Distância | Ângulo | Rede |
 |--------------------|-----|-----------|--------|------|
 | `madeira-0mm-0g` | 000101 | 0 mm | 0° | com |
 | `plastico-0mm-0g` | 000102 | 0 mm | 0° | com |
 | `aco-0mm-0g` | 000103 | 0 mm | 0° | com |
-| `eletronico-0mm` | 000104 | 0 mm | 0° | com |
-| `aco-10mm-0g` | 000103 | 10 mm | 0° | com |
 | `angulo-90g` | 000101 | 0 mm | 90° | com |
 | `sem-rede` | 000101 | 0 mm | 0° | sem |
+
+Ficam fora a variação de distância e o bem vizinho a eletrônico
+energizado, que permanece no conjunto de referência sem ser exercitado.
+Por isso a distância máxima efetiva saiu das métricas.
 
 Dez repetições não ordenam entre si substratos de desempenho próximo. O que
 elas sustentam é a distinção grossa: pela regra de três, dez leituras sem
 falha situam a taxa de falha abaixo de 30% com 95% de confiança, o que
 separa a condição em que a captura funciona daquela em que não funciona.
-A bateria leva cerca de 20 minutos.
 
 ## Passos
 
@@ -83,7 +84,7 @@ A bateria leva cerca de 20 minutos.
    tocar em "Conferir próximo bem" e aproximar. Repetir 10 vezes, afastando o
    aparelho do gabarito entre uma tentativa e outra, para que cada repetição
    seja uma aproximação completa e não uma leitura contínua.
-7. Trocar a condição no seletor e repetir o passo 6, até as sete condições.
+7. Trocar a condição no seletor e repetir o passo 6, até as cinco condições.
    Na condição `sem-rede`, colocar o aparelho em modo avião antes e restaurar
    a rede ao final, conferindo que a fila subiu.
 8. Encerrar o ciclo em "Encerrar ciclo". O encerramento consolida o resultado
@@ -92,13 +93,6 @@ A bateria leva cerca de 20 minutos.
 9. Conferir que o CSV saiu com uma linha por condição.
 10. Apurar: `cd api && npm run metricas -- <id do ciclo>`. O CSV sai em
     `api/ensaios/dados/`, com uma linha por condição.
-
-## Distância máxima efetiva
-
-Medida à parte, em dois substratos de comportamento oposto — madeira e aço
-pintado. Cinco leituras em 0, 10 e 20 mm, com o ângulo em 0°. A distância
-máxima efetiva é o maior passo em que as cinco leram. São 30 leituras, uns
-10 minutos.
 
 ## Ensaio de integridade offline
 
