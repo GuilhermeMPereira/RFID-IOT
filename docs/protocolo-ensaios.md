@@ -34,13 +34,24 @@ carimbo registrado pela própria aplicação.
 
 ## Conjunto de aparelhos
 
-Mínimo de três modelos distintos de Android com NFC e Chrome 89 ou superior,
-de fabricantes diferentes, porque a posição da antena e a implementação da
-pilha NFC variam por fabricante. Cada aparelho executa o roteiro completo.
+Dois modelos de Android com NFC e Chrome 89 ou superior. A divisão não é
+simétrica, de propósito:
+
+- **Aparelho A** percorre as dez condições, 30 repetições cada — 300
+  tentativas. É dele que saem os resultados por condição do Quadro 5.
+- **Aparelho B** repete só as quatro condições de substrato a 0 mm
+  (`madeira-0mm-0g`, `plastico-0mm-0g`, `aco-0mm-0g`, `eletronico-0mm`),
+  30 cada — 120 tentativas. Serve para indicar se o comportamento se
+  transfere entre aparelhos, já que a posição da antena e a pilha NFC variam
+  por fabricante.
+
+Total: 420 tentativas, cerca de 1h30. Com dois modelos a compatibilidade não
+é resultado generalizável; entra no artigo como indicação, e a ampliação do
+conjunto fica como trabalho futuro.
 
 ## Condições e repetições
 
-Dez condições, 30 repetições cada, por aparelho. Trinta repetições por
+Dez condições, 30 repetições cada. Trinta repetições por
 condição permitem estimar a taxa de sucesso com erro padrão abaixo de 10
 pontos percentuais no pior caso (p = 0,5), suficiente para separar uma
 condição que falha de uma que não falha, que é a pergunta do ensaio.
@@ -58,8 +69,8 @@ condição que falha de uma que não falha, que é a pergunta do ensaio.
 | `angulo-90g` | 000101 | 0 mm | 90° | com |
 | `sem-rede` | 000101 | 0 mm | 0° | sem |
 
-São 300 tentativas por aparelho e 900 no conjunto de três. A bateria completa
-de um aparelho leva em torno de uma hora.
+São 300 tentativas no aparelho A e 120 no B, 420 no total. A bateria
+completa do aparelho A leva em torno de uma hora; a do B, meia.
 
 ## Passos
 
@@ -86,7 +97,8 @@ de um aparelho leva em torno de uma hora.
 8. Encerrar o ciclo em "Encerrar ciclo". O encerramento consolida o resultado
    e impede leitura posterior, de modo que a apuração seja sobre um conjunto
    fechado.
-9. Repetir os passos 4 a 8 nos demais aparelhos.
+9. Repetir os passos 4 a 8 no aparelho B, só com as quatro condições de
+   substrato a 0 mm.
 10. Apurar: `cd api && npm run metricas -- <id do ciclo>`. O CSV sai em
     `api/ensaios/dados/`, com uma linha por condição.
 
